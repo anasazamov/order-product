@@ -7,6 +7,8 @@ class ProductTypeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ProductSerializer(serializers.ModelSerializer):
+    photo = serializers.ImageField(required=False)
+    description = serializers.CharField(required=False)
     class Meta:
         model = Product
         fields = '__all__'
@@ -17,6 +19,8 @@ class BlogTypeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class BlogSerializer(serializers.ModelSerializer):  
+    photo = serializers.ImageField(required=False) 
+    description = serializers.CharField(required=False)
     class Meta:
         model = Blog
         fields = '__all__'

@@ -53,11 +53,18 @@ class Order(models.Model):
             ('TT', 'Toshkent shahri'),
         ]
     
+    STATUS_TYPES = [
+            ('Pending', 'Pending'),
+            ('Conversion', 'Conversion'),
+            ('Completed', 'Completed'),
+            ('Cancelled', 'Cancelled'),
+            ('Refunded', 'Refunded'),
+        ]
+    
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
     contact = models.ForeignKey(Contact, on_delete=models.SET_NULL, null=True)
-    quantity = models.IntegerField(null=False)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, null=True)
-    status = models.CharField(max_length=255, null=False, default='Pending')
+    status = models.CharField(max_length=255, null=False, default='Pending', choices=STATUS_TYPES)
     region = models.CharField(max_length=255, null=False, choices=UZB_REGIONS)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

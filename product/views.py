@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiParameter
+from rest_framework.parsers import MultiPartParser, FormParser
 
 # Create your views here.
 
@@ -16,6 +17,7 @@ class ProductTypeViewSet(viewsets.ModelViewSet):
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    parser_classes = [MultiPartParser, FormParser]
     # permission_classes = [IsAuthenticated]
 
     
@@ -41,6 +43,7 @@ class BlogTypeViewSet(viewsets.ModelViewSet):
 class BlogViewSet(viewsets.ModelViewSet):
     queryset = Blog.objects.all()
     serializer_class = BlogSerializer
+    parser_classes = [MultiPartParser, FormParser]
     # permission_classes = [IsAuthenticated]
 
     
