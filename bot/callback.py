@@ -11,31 +11,31 @@ def start(update: Update, context: CallbackContext):
 
     if BotAdmin.objects.filter(chat_id=chat_id, is_active=True).exists():
         update.message.reply_text(
-            'Salom buyurtma va xabarnoma botiga xush kelibsiz!',
+            'Здравствуйте, добро пожаловать в бота для заказов и уведомлений!',
             reply_markup=ReplyKeyboardMarkup(
-                [[KeyboardButton('🛒 Buyurtmalarni korish'), KeyboardButton('📝 Xabarlarni korish')]],
+                [[KeyboardButton('🛒 Просмотр заказов'), KeyboardButton('📝 Просмотр сообщений')]],
                 resize_keyboard=True
             )
         )
         return
-    
-    update.message.reply_text('Botdan foydalanish uchun Admin ruxsatini so\'rang!', reply_markup=ReplyKeyboardMarkup([[KeyboardButton('🔑 Ruxsat so\'rash')]], resize_keyboard=True))
+
+    update.message.reply_text('Чтобы использовать бота, запросите разрешение у администратора!', reply_markup=ReplyKeyboardMarkup([[KeyboardButton('🔑 Запросить разрешение')]], resize_keyboard=True))
     return
 
 def admin_permission(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     fullname = update.effective_chat.full_name
     username = update.effective_chat.username
-    
+
     if BotAdmin.objects.filter(chat_id=chat_id).exists():
-        update.message.reply_text('Siz oldin ruxsat so\'rashga urinib ko\'rdingiz!')
+        update.message.reply_text('Вы уже пытались запросить разрешение!')
         return
-    
+
     BotAdmin.objects.create(chat_id=chat_id, fullname=fullname, username=username, is_active=False)
     bot_admin = BotAdmin.objects.filter(is_active=True).values('chat_id', 'fullname', 'username')
     for admin in bot_admin:
-        context.bot.send_message(admin['chat_id'], f'Foydalanuvchi adminlik ruxsatini so\'radi! \n\nChat ID: {chat_id}\nFullname: {fullname}\nUsername: {username}', reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Ruxsat berish', callback_data=f'allow_access_{chat_id}'), InlineKeyboardButton('Rad etish', callback_data=f'deny_access_{chat_id}')]]))
-    update.message.reply_text('So\'rov muvaffaqiyatli qabul qilindi! Iltimos kuting, sizga tez orada ruxsat beriladi!')
+        context.bot.send_message(admin['chat_id'], f'Пользователь запросил разрешение администратора! \n\nChat ID: {chat_id}\nПолное имя: {fullname}\nИмя пользователя: {username}', reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Разрешить', callback_data=f'allow_access_{chat_id}'), InlineKeyboardButton('Отклонить', callback_data=f'deny_access_{chat_id}')]]))
+    update.message.reply_text('Запрос успешно принят! Пожалуйста, подождите, вам скоро дадут разрешение!')
 
 def allow_access(update: Update, context: CallbackContext):
     query = update.callback_query
@@ -43,14 +43,14 @@ def allow_access(update: Update, context: CallbackContext):
     if data.startswith('allow_access_'):
         chat_id = data.split('_')[2]
         BotAdmin.objects.filter(chat_id=chat_id).update(is_active=True)
-        context.bot.send_message(chat_id, 'Sizga admin ruxsat berdi!\n\n botdan foydalanish uchun /start buyrug\'ini yuboring!')
-        query.edit_message_text('Ruxsat berildi!')
+        context.bot.send_message(chat_id, 'Администратор дал вам разрешение!\n\nОтправьте команду /start для использования бота!')
+        query.edit_message_text('Разрешение предоставлено!')
 
     elif data.startswith('deny_access_'):
         chat_id = data.split('_')[2]
         BotAdmin.objects.filter(chat_id=chat_id).delete()
-        context.bot.send_message(chat_id, 'Sizga admin ruxsat bermadi!')
-        query.edit_message_text('Ruxsat berilmadi!')
+        context.bot.send_message(chat_id, 'Администратор не дал вам разрешение!')
+        query.edit_message_text('Разрешение не предоставлено!')
 
 def view_order_types(update: Update, context: CallbackContext):
     order_types = Order.STATUS_TYPES
@@ -63,11 +63,11 @@ def view_order_types(update: Update, context: CallbackContext):
                 order_count = Order.objects.filter(status=status_code).count()
                 buttons.append(InlineKeyboardButton(f"{status_name} ({order_count})", callback_data=f"order_status_{status_code}"))
         order_types_buttons.append(buttons)
-    
-    order_types_buttons.append([InlineKeyboardButton('🔙 Orqaga', callback_data='back_to_start')])
+
+    order_types_buttons.append([InlineKeyboardButton('🔙 Назад', callback_data='back_to_start')])
 
     update.message.reply_text(
-        'Buyurtma holatini tanlang:',
+        'Выберите статус заказа:',
         reply_markup=InlineKeyboardMarkup(order_types_buttons)
     )
 
@@ -88,12 +88,13 @@ def view_order_regions(update: Update, context: CallbackContext):
                     region_count = Order.objects.filter(status=status_code, region=region_code).count()
                     buttons.append(InlineKeyboardButton(f"{region_name} ({region_count})", callback_data=f"region_{region_code}_{status_code}"))
             region_buttons.append(buttons)
-        region_buttons.append([InlineKeyboardButton('🔙 Orqaga', callback_data='back_to_order_types')])
+        region_buttons.append([InlineKeyboardButton('🔙 Назад', callback_data='back_to_order_types')])
 
         query.edit_message_text(
-            'Hududlar bo\'yicha buyurtmalar soni:',
+            'Количество заказов по регионам:',
             reply_markup=InlineKeyboardMarkup(region_buttons)
         )
+
 
 def view_orders_by_region_status(update: Update, context: CallbackContext):
     query = update.callback_query
@@ -105,7 +106,7 @@ def view_orders_by_region_status(update: Update, context: CallbackContext):
         orders = Order.objects.filter(region=region_code, status=status_code)
 
         if not orders.exists():
-            query.edit_message_text("Bu hudud va status bo'yicha buyurtmalar topilmadi.")
+            query.edit_message_text("Заказы по этому региону и статусу не найдены.")
             return
 
         page_number = int(context.args[0]) if context.args else 1
@@ -117,26 +118,26 @@ def view_orders_by_region_status(update: Update, context: CallbackContext):
         current_page = paginator.page(page_number)
 
         keyboard = [
-            [InlineKeyboardButton(f"Mahsulot: {order.product.name}", callback_data=f"order_{order.pk}")]
+            [InlineKeyboardButton(f"Продукт: {order.product.name}", callback_data=f"order_{order.pk}")]
             for order in current_page
         ]
 
         navigation_buttons = []
         if current_page.has_previous():
-            navigation_buttons.append(InlineKeyboardButton("⬅️ Oldingi", callback_data=f"region_{region_code}_{status_code}_{page_number - 1}"))
+            navigation_buttons.append(InlineKeyboardButton("⬅️ Назад", callback_data=f"region_{region_code}_{status_code}_{page_number - 1}"))
 
         if current_page.has_next():
-            navigation_buttons.append(InlineKeyboardButton("Keyingi ➡️", callback_data=f"region_{region_code}_{status_code}_{page_number + 1}"))
+            navigation_buttons.append(InlineKeyboardButton("Вперёд ➡️", callback_data=f"region_{region_code}_{status_code}_{page_number + 1}"))
 
         if navigation_buttons:
             keyboard.append(navigation_buttons)
 
-        keyboard.append([InlineKeyboardButton("🔙 Orqaga", callback_data=f"order_status_{status_code}")])
+        keyboard.append([InlineKeyboardButton("🔙 Назад", callback_data=f"order_status_{status_code}")])
         try:
-            query.edit_message_text("Buyurtmalar ro'yxati:", reply_markup=InlineKeyboardMarkup(keyboard))
+            query.edit_message_text("Список заказов:", reply_markup=InlineKeyboardMarkup(keyboard))
         except:
             query.message.delete()
-            query.message.reply_text("Buyurtmalar ro'yxati:", reply_markup=InlineKeyboardMarkup(keyboard))
+            query.message.reply_text("Список заказов:", reply_markup=InlineKeyboardMarkup(keyboard))
         
 
 def view_order(update: Update, context: CallbackContext):
@@ -148,34 +149,23 @@ def view_order(update: Update, context: CallbackContext):
         order_id = query.data.split("_")[-1]
         order = Order.objects.get(id=order_id)
 
-        order_status_buttons = [[InlineKeyboardButton("Gaplashish", callback_data=f"st_chat_{order_id}"), InlineKeyboardButton("Qayta gaplashish", callback_data=f"st_rechat_{order_id}")],
-                                [InlineKeyboardButton("Muvaqqiyatli yakunlash", callback_data=f"st_success_{order_id}"), InlineKeyboardButton("Bekor qilindi", callback_data=f"st_cancel_{order_id}")],
-                                [InlineKeyboardButton("🔙 Orqaga", callback_data=f"region_{order.region}_{order.status}")]]
+        order_status_buttons = [[InlineKeyboardButton("Говорить", callback_data=f"st_chat_{order_id}"), InlineKeyboardButton("Переговоры", callback_data=f"st_rechat_{order_id}")],
+                                [InlineKeyboardButton("Завершить успешно", callback_data=f"st_success_{order_id}"), InlineKeyboardButton("Отменено", callback_data=f"st_cancel_{order_id}")],
+                                [InlineKeyboardButton("🔙 Назад", callback_data=f"region_{order.region}_{order.status}")]]
 
         if order.product.photo:
             return context.bot.send_photo(
                 chat_id=query.message.chat_id,
                 photo=order.product.photo.file,
-                caption=f"Buyurtma: {order.product.name}\n"
-                f"Mijoz: {order.client_name}\n"
-                f"Telefon: {order.phone_number if '+' in order.phone_number else f'+{order.phone_number}'}\n"
-                f"Buyurtma holati: {order.get_status_display()}\n"
-                f"Hudud: {order.get_region_display()}\n"
-                f"Buyurtma berilgan vaqti {order.created_at.strftime('%d-%m-%Y %H:%M')}\n"
-                f"Buyurtma bilan ishlagan vaqti {order.updated_at.strftime('%d-%m-%Y %H:%M')}",
+                caption=f"Заказ: {order.product.name}\n"
+                f"Клиент: {order.client_name}\n"
+                f"Телефон: {order.phone_number}\n"
+                f"Статус заказа: {order.get_status_display()}\n"
+                f"Регион: {order.get_region_display()}\n"
+                f"Создано: {order.created_at.strftime('%d-%m-%Y %H:%M')}\n"
+                f"Обновлено: {order.updated_at.strftime('%d-%m-%Y %H:%M')}",
                 reply_markup=InlineKeyboardMarkup(order_status_buttons)
             )
-
-        query.edit_message_text(
-            f"Buyurtma: {order.product.name}\n"
-            f"Mijoz: {order.client_name}\n"
-            f"Telefon: {order.phone_number}\n"
-            f"Buyurtma holati: {order.status}\n"
-            f"Hudud: {order.region}\n"
-            f"Buyurtma berilgan vaqti {order.created_at.strftime('%d-%m-%Y %H:%M')}\n"
-                f"Buyurtma bilan ishlagan vaqti {order.updated_at.strftime('%d-%m-%Y %h:%m')}",
-            reply_markup=InlineKeyboardMarkup(order_status_buttons)
-        )
 
 def order_statused(update: Update, context: CallbackContext):
     query = update.callback_query
@@ -187,7 +177,7 @@ def order_statused(update: Update, context: CallbackContext):
         order.status = "cn"
         order.save()
         query.message.delete()
-        query.message.reply_text("Mijoz bilan gaplashilmoqda!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Orqaga", callback_data=f"back_to_start")]]))
+        query.message.reply_text("Идёт общение с клиентом!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Назад", callback_data=f"back_to_start")]]))
 
     elif query.data.startswith("st_rechat_"):
         order_id = query.data.split("_")[2]
@@ -195,7 +185,7 @@ def order_statused(update: Update, context: CallbackContext):
         order.status = "rc"
         order.save()
         query.message.delete()
-        query.message.reply_text("Mijoz bilan qayta gaplashishga qoldirildi!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Orqaga", callback_data=f"back_to_start")]]))
+        query.message.reply_text("Оставлено для повторного общения с клиентом!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Назад", callback_data=f"back_to_start")]]))
 
     elif query.data.startswith("st_success_"):
         order_id = query.data.split("_")[2]
@@ -203,7 +193,7 @@ def order_statused(update: Update, context: CallbackContext):
         order.status = "cd"
         order.save()
         query.message.delete()
-        query.message.reply_text("Buyurtma muvaffaqiyatli yakunlandi!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Orqaga", callback_data=f"back_to_start")]]))
+        query.message.reply_text("Заказ успешно завершён!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Назад", callback_data=f"back_to_start")]]))
 
     elif query.data.startswith("st_cancel_"):
         order_id = query.data.split("_")[2]
@@ -211,7 +201,7 @@ def order_statused(update: Update, context: CallbackContext):
         order.status = "cnd"
         order.save()
         query.message.delete()
-        query.message.reply_text("Buyurtma bekor qilindi!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Orqaga", callback_data=f"back_to_start")]]))
+        query.message.reply_text("Заказ отменён!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Назад", callback_data=f"back_to_start")]]))
 
 def back_to_start(update: Update, context: CallbackContext):
     query = update.callback_query
@@ -219,12 +209,13 @@ def back_to_start(update: Update, context: CallbackContext):
 
     query.message.delete()
     query.message.reply_text(
-        'Buyurtma va xabarnoma botiga xush kelibsiz!',
+        'Добро пожаловать в бота для заказов и уведомлений!',
         reply_markup=ReplyKeyboardMarkup(
-            [[KeyboardButton('🛒 Buyurtmalarni korish'), KeyboardButton('📝 Xabarlarni korish')]],
+            [[KeyboardButton('🛒 Просмотр заказов'), KeyboardButton('📝 Просмотр сообщений')]],
             resize_keyboard=True
         )
     )
+
 
 def view_contacts(update: Update, context: CallbackContext):
     page_number = int(context.args[0]) if context.args else 1
@@ -232,7 +223,7 @@ def view_contacts(update: Update, context: CallbackContext):
     contacts = Contact.objects.all()
 
     if not contacts.exists():
-        update.message.reply_text("Xabarlar topilmadi!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Orqaga", callback_data="back_to_start")]]))
+        update.message.reply_text("Сообщения не найдены!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Назад", callback_data="back_to_start")]]))
         return
 
     paginator = Paginator(contacts, 10)
@@ -250,17 +241,16 @@ def view_contacts(update: Update, context: CallbackContext):
     navigation_buttons = []
 
     if current_page.has_previous():
-        navigation_buttons.append(InlineKeyboardButton("⬅️ Oldingi", callback_data=f"contacts_page_{page_number - 1}"))
+        navigation_buttons.append(InlineKeyboardButton("⬅️ Назад", callback_data=f"contacts_page_{page_number - 1}"))
 
     if current_page.has_next():
-        navigation_buttons.append(InlineKeyboardButton("Keyingi ➡️", callback_data=f"contacts_page_{page_number + 1}"))
+        navigation_buttons.append(InlineKeyboardButton("Вперёд ➡️", callback_data=f"contacts_page_{page_number + 1}"))
 
     if navigation_buttons:
         keyboard.append(navigation_buttons)
 
-    keyboard
+    update.message.reply_text("Список сообщений:", reply_markup=InlineKeyboardMarkup(keyboard))
 
-    update.message.reply_text("Xabarlar ro'yxati:", reply_markup=InlineKeyboardMarkup(keyboard))
 
 def view_contact_detail(update: Update, context: CallbackContext):
     query = update.callback_query
@@ -269,6 +259,6 @@ def view_contact_detail(update: Update, context: CallbackContext):
     contact_id = int(query.data.split("_")[1])
     contact = Contact.objects.get(id=contact_id)
 
-    message = f"Ism: {contact.name}\nTelefon: {contact.phone}\nXabar: {contact.message}"
+    message = f"Имя: {contact.name}\nТелефон: {contact.phone}\nСообщение: {contact.message}"
 
-    query.edit_message_text(message, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Orqaga", callback_data="back_to_start")]]))
+    query.edit_message_text(message, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Назад", callback_data="back_to_start")]]))

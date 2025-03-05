@@ -15,15 +15,22 @@ logger = logging.getLogger(__name__)
 def order_created_signal(sender, instance, created, **kwargs):
     if created:
         bot_admins = BotAdmin.objects.filter(is_active=True)
-        name = instance.product.name
-        id = instance.pk
+        product_name = instance.product.name
+        order_id = instance.pk
         region = instance.region
         keyboard = [[
-            InlineKeyboardButton("Buyurtmani Ko'rish", callback_data=f"order_{id}"),
+            InlineKeyboardButton("📦 Посмотреть заказ", callback_data=f"order_{order_id}"),
         ]]
         
         for admin in bot_admins:
-            bot.send_message(chat_id=admin.chat_id, text=f"🛒 Yangi buyurtma qo'shildi: {name} - {region}", reply_markup=InlineKeyboardMarkup(keyboard))
+            message = (
+                f"🛒 <b>Новый заказ!</b>\n"
+                f"📌 <b>Товар:</b> {product_name}\n"
+                f"📍 <b>Регион:</b> {region}\n"
+                f"🔍 Нажмите, чтобы посмотреть детали заказа."
+            )
+            bot.send_message(chat_id=admin.chat_id, text=message, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
+
 
 @receiver(post_save, sender=Contact)
 def contact_created_signal(sender, instance, created, **kwargs):
@@ -31,8 +38,16 @@ def contact_created_signal(sender, instance, created, **kwargs):
         bot_admins = BotAdmin.objects.filter(is_active=True)
         name = instance.name
         phone = instance.phone
+        contact_id = instance.pk
         keyboard = [[
-            InlineKeyboardButton("Xabarni ko'rish", callback_data=f"contact_{instance.pk}"),
+            InlineKeyboardButton("📩 Просмотреть сообщение", callback_data=f"contact_{contact_id}"),
         ]]
+        
         for admin in bot_admins:
-            bot.send_message(chat_id=admin.chat_id, text=f"📝 Yangi xabar qo'shildi: {name} - {phone}", reply_markup=InlineKeyboardMarkup(keyboard))
+            message = (
+                f"📬 <b>Новое сообщение!</b>\n"
+                f"👤 <b>Имя:</b> {name}\n"
+                f"📞 <b>Телефон:</b> {phone}\n"
+                f"🔍 Нажмите, чтобы просмотреть детали."
+            )
+            bot.send_message(chat_id=admin.chat_id, text=message, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
