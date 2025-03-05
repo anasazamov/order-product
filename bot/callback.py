@@ -13,7 +13,7 @@ def start(update: Update, context: CallbackContext):
         update.message.reply_text(
             'Здравствуйте, добро пожаловать в бота для заказов и уведомлений!',
             reply_markup=ReplyKeyboardMarkup(
-                [[KeyboardButton('🛒 Просмотр заказов'), KeyboardButton('📝 Просмотр сообщений')]],
+                [[KeyboardButton('🛒 Просмотреть заказы'), KeyboardButton('📝 Просмотреть сообщения')]],
                 resize_keyboard=True
             )
         )
