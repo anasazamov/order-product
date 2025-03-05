@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
+from rest_framework.response import Response
+from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler, MessageHandler, Filters
 from bot.callback import (
     start,
@@ -19,9 +21,11 @@ from bot.callback import (
 # Create your views here.
 
 class BotAdminViewSet(APIView):
-     def get(request):
+     def post(self, request):
         updater = Updater('TOKEN', use_context=True)
         dispatcher = updater.dispatcher
+        bot = updater.bot
+        data = request.data
 
         dispatcher.add_handler(CommandHandler('start', start))
         dispatcher.add_handler(MessageHandler(Filters.regex('🔑 Ruxsat so\'rash'), admin_permission))
@@ -35,3 +39,6 @@ class BotAdminViewSet(APIView):
         dispatcher.add_handler(MessageHandler(Filters.regex('📝 Xabarlarni korish'), view_contacts))
         dispatcher.add_handler(CallbackQueryHandler(view_contact_detail, pattern='^contact_'))
         dispatcher.add_handler(CallbackQueryHandler(back_to_start, pattern='^back_to_start'))
+        update: Update = Update.de_json(data, bot)
+        dispatcher.process_update(update)
+        return Response({'message': 'Bot is running...'})

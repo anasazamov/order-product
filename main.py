@@ -20,7 +20,7 @@ from bot.callback import (
     view_contact_detail
 )
 
-updater = Updater('TOKEN', use_context=True)
+updater = Updater('Token')
 dispatcher = updater.dispatcher
 
 def main():
