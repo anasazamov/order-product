@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from .models import Product, ProductType, Blog, BlogType, Contact, Order
-from .serializers import ProductSerializer, ProductTypeSerializer, BlogSerializer, BlogTypeSerializer, ContactSerializer, OrderSerializer
+from .models import Product, Blog, BlogType, Contact, Order
+from .serializers import ProductSerializer, BlogSerializer, BlogTypeSerializer, ContactSerializer, OrderSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -8,11 +8,6 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework.parsers import MultiPartParser, FormParser
 
 # Create your views here.
-
-class ProductTypeViewSet(viewsets.ModelViewSet):
-    queryset = ProductType.objects.all()
-    serializer_class = ProductTypeSerializer
-    # permission_classes = [IsAuthenticated]
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
@@ -73,16 +68,27 @@ class OrderViewSet(viewsets.ModelViewSet):
 
 class RegionAPIView(APIView):
     def get(self, request):
-        response = []
+        region = []
+        status = []
         regions = Order.UZB_REGIONS
+        statuses = Order.STATUS_TYPES
         
         for label, name in regions:
-            response.append({
+            region.append({
                 'label': label,
                 'name': name
             })
         
-        return Response(response)
+        for label, name in statuses:
+            status.append({
+                'label': label,
+                'name': name
+            })
+        
+        return Response({
+            'regions': region,
+            'statuses': status
+        })
     
 
 

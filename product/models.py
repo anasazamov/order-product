@@ -17,17 +17,10 @@ class Blog(models.Model):
     description = models.TextField(blank='')
     photo = models.ImageField(upload_to='blog/', null=True)
 
-class ProductType(models.Model):
-    name = models.CharField(max_length=255, null=False)
-
 class Product(models.Model):
     name = models.CharField(max_length=255, null=False)
     description = models.TextField(blank='')
     photo = models.ImageField(upload_to='product/', null=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2, null=True)
-    product_type = models.ForeignKey(ProductType, on_delete=models.SET_NULL, null=True)
-
-
 
 class Contact(models.Model):
     name = models.CharField(max_length=255, null=False)
@@ -54,16 +47,16 @@ class Order(models.Model):
         ]
     
     STATUS_TYPES = [
-            ('Pending', 'Pending'),
-            ('Conversion', 'Conversion'),
-            ('Completed', 'Completed'),
-            ('Cancelled', 'Cancelled'),
-            ('Refunded', 'Refunded'),
+            ('pn', 'Kutilmoqda'),
+            ('cn', 'Gaplashildi'),
+            ('cd', 'Muvaqqiyatli yakunlandi'),
+            ('cnd', 'Bekor qilindi'),
+            ('rc', 'Qayta Gaplashish'),
         ]
     
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
-    contact = models.ForeignKey(Contact, on_delete=models.SET_NULL, null=True)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    client_name = models.CharField(max_length=255, null=False)
+    phone_number = models.CharField(max_length=255, null=False, validators=[validate_phone])
     status = models.CharField(max_length=255, null=False, default='Pending', choices=STATUS_TYPES)
     region = models.CharField(max_length=255, null=False, choices=UZB_REGIONS)
     created_at = models.DateTimeField(auto_now_add=True)

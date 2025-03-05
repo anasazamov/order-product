@@ -46,7 +46,9 @@ LOCALS_APP = [
     'product',
     'rest_framework_simplejwt',
     'drf_spectacular',
-    'corsheaders'
+    'corsheaders',
+    'bot',
+    
     # 'drf_spectacular_sidecar'
     ]
 
