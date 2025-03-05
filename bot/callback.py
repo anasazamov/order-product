@@ -19,7 +19,7 @@ def start(update: Update, context: CallbackContext):
         )
         return
 
-    update.message.reply_text('Чтобы использовать бота, запросите разрешение у администратора!', reply_markup=ReplyKeyboardMarkup([[KeyboardButton('🔑 Запросить разрешение')]], resize_keyboard=True))
+    update.message.reply_text('Чтобы использовать бота, запросите разрешение у администратора!', reply_markup=ReplyKeyboardMarkup([[KeyboardButton('🔑 Запросить доступ')]], resize_keyboard=True))
     return
 
 def admin_permission(update: Update, context: CallbackContext):
