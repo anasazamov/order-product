@@ -30,29 +30,29 @@ class Contact(models.Model):
 class Order(models.Model):
     
     UZB_REGIONS = [
-            ('AN', 'Andijon'),
-            ('BU', 'Buxoro'),
-            ('FA', 'Farg‘ona'),
-            ('JI', 'Jizzax'),
-            ('XO', 'Xorazm'),
-            ('NA', 'Namangan'),
-            ('NG', 'Navoiy'),
-            ('QA', 'Qashqadaryo'),
-            ('QR', 'Qoraqalpog‘iston'),
-            ('SA', 'Samarqand'),
-            ('SI', 'Sirdaryo'),
-            ('SU', 'Surxondaryo'),
-            ('TO', 'Toshkent viloyati'),
-            ('TT', 'Toshkent shahri'),
-        ]
-    
+        ('AN', 'Андижан'),
+        ('BU', 'Бухара'),
+        ('FA', 'Фергана'),
+        ('JI', 'Джизак'),
+        ('XO', 'Хорезм'),
+        ('NA', 'Наманган'),
+        ('NG', 'Навои'),
+        ('QA', 'Кашкадарья'),
+        ('QR', 'Каракалпакстан'),
+        ('SA', 'Самарканд'),
+        ('SI', 'Сырдарья'),
+        ('SU', 'Сурхандарья'),
+        ('TO', 'Ташкентская область'),
+        ('TT', 'Город Ташкент'),
+    ]
+
     STATUS_TYPES = [
-            ('pn', 'Kutilmoqda'),
-            ('cn', 'Gaplashildi'),
-            ('cd', 'Muvaqqiyatli yakunlandi'),
-            ('cnd', 'Bekor qilindi'),
-            ('rc', 'Qayta Gaplashish'),
-        ]
+        ('pn', 'В ожидании'),
+        ('cn', 'Обсуждено'),
+        ('cd', 'Успешно завершено'),
+        ('cnd', 'Отменено'),
+        ('rc', 'Повторное обсуждение'),
+    ]
     
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
     client_name = models.CharField(max_length=255, null=False)
