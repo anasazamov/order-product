@@ -88,7 +88,7 @@ def view_order_regions(update: Update, context: CallbackContext):
                     region_count = Order.objects.filter(status=status_code, region=region_code).count()
                     buttons.append(InlineKeyboardButton(f"{region_name} ({region_count})", callback_data=f"region_{region_code}_{status_code}"))
             region_buttons.append(buttons)
-        region_buttons.append([InlineKeyboardButton('🔙 Назад', callback_data='back_to_order_types')])
+        region_buttons.append([InlineKeyboardButton('🔙 Назад', callback_data='back_to_start_')])
 
         query.edit_message_text(
             'Количество заказов по регионам:',
