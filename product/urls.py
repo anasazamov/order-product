@@ -12,6 +12,7 @@ router.register(r'order', OrderViewSet, basename='order')
 
 urlpatterns = router.urls
 urlpatterns += [
-    path('regions-statuses/', RegionAPIView.as_view())
+    path('regions-statuses/', RegionAPIView.as_view()),
+    
 ]
 

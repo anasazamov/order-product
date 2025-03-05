@@ -87,11 +87,18 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'Swagger API',
     'DESCRIPTION': 'Blog sayt uchun',
     'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
+    'SERVE_INCLUDE_SCHEMA': False,  # `/schema/` endpointni yashirish uchun
     'SWAGGER_UI_SETTINGS': {
         'deepLinking': True,
         'defaultModelsExpandDepth': 2,
+        'displayRequestDuration': True,  # So‘rov davomiyligini ko‘rsatish
     },
+    'COMPONENT_SPLIT_REQUEST': True,  # Multipart/FormData uchun muhim
+    'SCHEMA_PATH_PREFIX': '/api/v1',  # Agar API prefix bo‘lsa, kiritish
+    'ENUM_NAME_OVERRIDES': {
+        'UploadFile': 'File',  # Fayl uchun to‘g‘ri tip
+    },
+    'ENABLE_DJANGO_DEPLOY_CHECK': False,  # Productionda deploy tekshirishini o‘chirish
 }
 
 WSGI_APPLICATION = 'core.wsgi.application'

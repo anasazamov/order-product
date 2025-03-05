@@ -17,12 +17,12 @@ from bot.callback import (
     view_contact_detail
 )
 
-
+updater = Updater('7451785085:AAG3E1F_C86kyJ5f23ak0_3-CchGxPIUoig', use_context=True)
 # Create your views here.
 
 class BotAdminViewSet(APIView):
      def post(self, request):
-        updater = Updater('TOKEN', use_context=True)
+       
         dispatcher = updater.dispatcher
         bot = updater.bot
         data = request.data
@@ -41,4 +41,7 @@ class BotAdminViewSet(APIView):
         dispatcher.add_handler(CallbackQueryHandler(back_to_start, pattern='^back_to_start'))
         update: Update = Update.de_json(data, bot)
         dispatcher.process_update(update)
+        return Response({'message': 'Bot is running...'})
+     
+     def get(self, request):
         return Response({'message': 'Bot is running...'})
