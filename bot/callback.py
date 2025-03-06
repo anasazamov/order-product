@@ -211,7 +211,7 @@ def back_to_start(update: Update, context: CallbackContext):
     query.message.reply_text(
         'Добро пожаловать в бота для заказов и уведомлений!',
         reply_markup=ReplyKeyboardMarkup(
-            [[KeyboardButton('🛒 Просмотр заказов'), KeyboardButton('📝 Просмотр сообщений')]],
+            [[KeyboardButton('🛒 Просмотреть заказы'), KeyboardButton('📝 Просмотреть сообщения')]],
             resize_keyboard=True
         )
     )
