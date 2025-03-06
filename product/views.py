@@ -40,7 +40,7 @@ class BlogViewSet(viewsets.ModelViewSet):
 
     
     def get_queryset(self):
-        if self.request.query_params.get('blog_type') is not None and self.request.query_params.get('blog_type') is not " ":
+        if self.request.query_params.get('blog_type') is not None and self.request.query_params.get('blog_type') != " ":
             return super().get_queryset().filter(blog_type=self.request.query_params.get('blog_type'))
         if self.request.query_params.get('search') is not None:
             return super().get_queryset().filter(title__icontains=self.request.query_params.get('search'))
