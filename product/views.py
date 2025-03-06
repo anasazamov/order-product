@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from .models import Product, Blog, BlogType, Contact, Order
-from .serializers import ProductSerializer, BlogSerializer, BlogTypeSerializer, ContactSerializer, OrderSerializer
+from .models import Product, Blog, Contact, Order
+from .serializers import ProductSerializer, BlogSerializer, ContactSerializer, OrderSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -27,10 +27,10 @@ class ProductViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-class BlogTypeViewSet(viewsets.ModelViewSet):
-    queryset = BlogType.objects.all()
-    serializer_class = BlogTypeSerializer
-    # permission_classes = [IsAuthenticated]
+# class BlogTypeViewSet(viewsets.ModelViewSet):
+#     queryset = BlogType.objects.all()
+#     serializer_class = BlogTypeSerializer
+#     # permission_classes = [IsAuthenticated]
 
 class BlogViewSet(viewsets.ModelViewSet):
     queryset = Blog.objects.all()
@@ -40,14 +40,14 @@ class BlogViewSet(viewsets.ModelViewSet):
 
     
     def get_queryset(self):
-        if self.request.query_params.get('blog_type') is not None and self.request.query_params.get('blog_type') is not "" and self.request.query_params.get('blog_type').isnumeric():
-            return super().get_queryset().filter(blog_type_id=int(self.request.query_params.get('blog_type')))
+        if self.request.query_params.get('blog_type') is not None and self.request.query_params.get('blog_type') is not " ":
+            return super().get_queryset().filter(blog_type=self.request.query_params.get('blog_type'))
         if self.request.query_params.get('search') is not None:
             return super().get_queryset().filter(title__icontains=self.request.query_params.get('search'))
         return super().get_queryset()
     
     @extend_schema(parameters=[
-        OpenApiParameter(name='blog_type', required=False, type=int, location=OpenApiParameter.QUERY, description='Filter by blog type'),
+        OpenApiParameter(name='blog_type', required=False, type=str, location=OpenApiParameter.QUERY, description='Filter by blog type'),
         OpenApiParameter(name='search', required=False, type=str, location=OpenApiParameter.QUERY, description='Search by title'),]
         )
     def list(self, request, *args, **kwargs):

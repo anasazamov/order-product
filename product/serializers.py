@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, Blog, BlogType, Contact, Order
+from .models import Product, Blog, Contact, Order
 
 # class ProductTypeSerializer(serializers.ModelSerializer):
 #     class Meta:
@@ -13,10 +13,10 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'
 
-class BlogTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = BlogType
-        fields = '__all__'
+# class BlogTypeSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = BlogType
+#         fields = '__all__'
 
 class BlogSerializer(serializers.ModelSerializer):  
     photo = serializers.ImageField(required=False) 

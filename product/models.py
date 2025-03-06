@@ -8,12 +8,12 @@ def validate_phone(value):
 
 # Create your models here.
 
-class BlogType(models.Model):
-    name = models.CharField(max_length=255, null=False)
+# class BlogType(models.Model):
+#     name = models.CharField(max_length=255, null=False)
 
 class Blog(models.Model):
     title = models.CharField(max_length=255, null=False)
-    blog_type = models.ForeignKey(BlogType, on_delete=models.SET_NULL, null=True)
+    blog_type = models.CharField(max_length=255, null=False)
     description = models.TextField(blank='')
     photo = models.ImageField(upload_to='blog/', null=True)
 

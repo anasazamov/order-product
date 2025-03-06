@@ -1,5 +1,5 @@
 from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton
-from product.models import BlogType, Blog, Product, Order, Contact
+from product.models import Order, Contact
 from telegram.ext import CallbackContext
 from django.core.paginator import Paginator
 
