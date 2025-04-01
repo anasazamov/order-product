@@ -48,6 +48,12 @@ def allow_access(update: Update, context: CallbackContext):
 
     elif data.startswith('deny_access_'):
         chat_id = data.split('_')[2]
+        bot_admin = BotAdmin.objects.filter(chat_id=chat_id)
+        
+        if bot_admin.exists() and bot_admin.first().is_active:
+            query.edit_message_text('Вы уже получили разрешение!')
+            return
+        
         BotAdmin.objects.filter(chat_id=chat_id).delete()
         context.bot.send_message(chat_id, 'Администратор не дал вам разрешение!')
         query.edit_message_text('Разрешение не предоставлено!')
