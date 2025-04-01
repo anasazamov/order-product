@@ -72,6 +72,11 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_permissions(self):
+        if self.action in ['create', 'update']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
 class RegionAPIView(APIView):
     def get(self, request):
         region = []
