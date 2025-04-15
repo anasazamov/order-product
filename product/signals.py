@@ -1,7 +1,7 @@
 # product/signals.py
 from django.db.models.signals import post_save, m2m_changed
 from django.dispatch import receiver
-from product.models import Order, Contact
+from product.models import Order, Contact, OrderItem
 import logging
 from bot.views import updater
 from bot.models import BotAdmin
@@ -11,16 +11,17 @@ bot = updater.bot
 
 logger = logging.getLogger(__name__)
 
-@receiver(m2m_changed, sender=Order.products.through)
-def order_product_changed(sender, instance, action, **kwargs):
-    if action == "post_add":
+@receiver(post_save, sender=OrderItem)
+def order_item_created_signal(sender, instance, created, **kwargs):
+    print(f"OrderItem created: {instance}")
+    if created:
+        order = instance.order
         bot_admins = BotAdmin.objects.filter(is_active=True)
-
         product_names = ", ".join(
-            [f"{item.product.name} x {item.quantity}" for item in instance.order_items.all()]
+            [f"{item.product.name} x {item.quantity}" for item in order.order_items.all()]
         )
-        order_id = instance.pk
-        region = instance.get_region_display()
+        order_id = order.pk
+        region = order.get_region_display()
         keyboard = [[
             InlineKeyboardButton("📦 Посмотреть заказ", callback_data=f"order_{order_id}"),
         ]]

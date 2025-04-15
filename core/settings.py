@@ -43,7 +43,7 @@ INSTALLED_APPS = [
 
 LOCALS_APP = [
     'rest_framework',
-    'product',
+    'product.apps.ProductConfig',
     'rest_framework_simplejwt',
     'drf_spectacular',
     'corsheaders',
