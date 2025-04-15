@@ -11,33 +11,40 @@ bot = updater.bot
 
 logger = logging.getLogger(__name__)
 
-@receiver(post_save, sender=OrderItem)
-def order_item_created_signal(sender, instance, created, **kwargs):
-    print(f"OrderItem created: {instance}")
-    if created:
-        order = instance.order
-        bot_admins = BotAdmin.objects.filter(is_active=True)
-        product_names = ", ".join(
-            [f"{item.product.name} x {item.quantity}" for item in order.order_items.all()]
+# bot_utils.py yoki shu kabi modulga yozing
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from bot.models import BotAdmin
+from bot.views import updater  # updater.bot orqali botga kirish mumkin
+
+bot = updater.bot
+
+def send_order_telegram_message(order):
+    # Bot adminlarni filtrlaymiz
+    bot_admins = BotAdmin.objects.filter(is_active=True)
+    # Orderdagi barcha OrderItem obyektlari orqali mahsulotlar va miqdorlarni olish
+    product_names = ", ".join(
+        [f"{item.product.name} x {item.quantity}" for item in order.order_items.all()]
+    )
+    order_id = order.pk
+    region = order.get_region_display()
+    keyboard = [[
+        InlineKeyboardButton("📦 Посмотреть заказ", callback_data=f"order_{order_id}"),
+    ]]
+    message = (
+        f"🛒 <b>Новый заказ!</b>\n"
+        f"📌 <b>Товар:</b> {product_names}\n"
+        f"📍 <b>Регион:</b> {region}\n"
+        f"🔍 Нажмите, чтобы посмотреть детали заказа."
+    )
+    # Barcha bot adminlarga xabar yuborish
+    for admin in bot_admins:
+        bot.send_message(
+            chat_id=admin.chat_id,
+            text=message,
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode="HTML"
         )
-        order_id = order.pk
-        region = order.get_region_display()
-        keyboard = [[
-            InlineKeyboardButton("📦 Посмотреть заказ", callback_data=f"order_{order_id}"),
-        ]]
-        message = (
-            f"🛒 <b>Новый заказ!</b>\n"
-            f"📌 <b>Товар:</b> {product_names}\n"
-            f"📍 <b>Регион:</b> {region}\n"
-            f"🔍 Нажмите, чтобы посмотреть детали заказа."
-        )
-        for admin in bot_admins:
-            bot.send_message(
-                chat_id=admin.chat_id,
-                text=message,
-                reply_markup=InlineKeyboardMarkup(keyboard),
-                parse_mode="HTML"
-            )
+
 
 
 @receiver(post_save, sender=Contact)
