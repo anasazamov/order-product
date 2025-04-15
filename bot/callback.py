@@ -132,7 +132,7 @@ def view_orders_by_region_status(update: Update, context: CallbackContext):
         current_page = paginator.page(page_number)
 
         keyboard = [
-            [InlineKeyboardButton(f"Продукт: {', '.join([p.name for p in order.product.all()])}", callback_data=f"order_{order.pk}")]
+            [InlineKeyboardButton(f"Продукт: {', '.join([item.product.name for item in order.order_items.all()])}", callback_data=f"order_{order.pk}")]
             for order in current_page
         ]
 
