@@ -35,6 +35,9 @@ class Product(models.Model):
     description = models.TextField(blank='')
     photo = models.ImageField(upload_to='product/', null=True)
 
+    def __str__(self):
+        return self.name
+
 class Contact(models.Model):
     name = models.CharField(max_length=255, null=False)
     phone = models.CharField(max_length=255, null=False, validators=[validate_phone])

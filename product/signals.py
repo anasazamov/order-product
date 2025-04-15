@@ -1,5 +1,5 @@
 # product/signals.py
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, m2m_changed
 from django.dispatch import receiver
 from product.models import Order, Contact
 import logging
@@ -11,26 +11,30 @@ bot = updater.bot
 
 logger = logging.getLogger(__name__)
 
-@receiver(post_save, sender=Order)
-def order_created_signal(sender, instance, created, **kwargs):
-    if created:
+@receiver(m2m_changed, sender=Order.product.through)
+def order_product_changed(sender, instance, action, **kwargs):
+
+    if action == "post_add":
         bot_admins = BotAdmin.objects.filter(is_active=True)
-        product_name = instance.product.name
+        product_names = ", ".join([p.name for p in instance.product.all()])
         order_id = instance.pk
-        region = instance.region
+        region = instance.get_region_display()
         keyboard = [[
             InlineKeyboardButton("📦 Посмотреть заказ", callback_data=f"order_{order_id}"),
         ]]
-        
+        message = (
+            f"🛒 <b>Новый заказ!</b>\n"
+            f"📌 <b>Товар:</b> {product_names}\n"
+            f"📍 <b>Регион:</b> {region}\n"
+            f"🔍 Нажмите, чтобы посмотреть детали заказа."
+        )
         for admin in bot_admins:
-            message = (
-                f"🛒 <b>Новый заказ!</b>\n"
-                f"📌 <b>Товар:</b> {product_name}\n"
-                f"📍 <b>Регион:</b> {region}\n"
-                f"🔍 Нажмите, чтобы посмотреть детали заказа."
+            bot.send_message(
+                chat_id=admin.chat_id,
+                text=message,
+                reply_markup=InlineKeyboardMarkup(keyboard),
+                parse_mode="HTML"
             )
-            bot.send_message(chat_id=admin.chat_id, text=message, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
-
 
 @receiver(post_save, sender=Contact)
 def contact_created_signal(sender, instance, created, **kwargs):

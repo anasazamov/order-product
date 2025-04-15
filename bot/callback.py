@@ -1,4 +1,4 @@
-from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton
+from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, InputMediaPhoto
 from product.models import Order, Contact
 from telegram.ext import CallbackContext
 from django.core.paginator import Paginator
@@ -106,6 +106,14 @@ def view_orders_by_region_status(update: Update, context: CallbackContext):
     query = update.callback_query
     query.answer()
 
+    if "order_message_ids" in context.chat_data:
+        for msg_id in context.chat_data["order_message_ids"]:
+            try:
+                context.bot.delete_message(chat_id=query.message.chat_id, message_id=msg_id)
+            except Exception as e:
+                pass
+        context.chat_data.clear()
+
     if query.data.startswith("region_"):
         _, region_code, status_code = query.data.split("_")
 
@@ -124,7 +132,7 @@ def view_orders_by_region_status(update: Update, context: CallbackContext):
         current_page = paginator.page(page_number)
 
         keyboard = [
-            [InlineKeyboardButton(f"Продукт: {order.product.name}", callback_data=f"order_{order.pk}")]
+            [InlineKeyboardButton(f"Продукт: {', '.join([p.name for p in order.product.all()])}", callback_data=f"order_{order.pk}")]
             for order in current_page
         ]
 
@@ -143,6 +151,10 @@ def view_orders_by_region_status(update: Update, context: CallbackContext):
             query.edit_message_text("Список заказов:", reply_markup=InlineKeyboardMarkup(keyboard))
         except:
             query.message.delete()
+            try:
+                query.message.delete()
+            except:
+                pass
             query.message.reply_text("Список заказов:", reply_markup=InlineKeyboardMarkup(keyboard))
         
 
@@ -152,37 +164,99 @@ def view_order(update: Update, context: CallbackContext):
 
     if query.data.startswith("order_"):
         query.message.delete()
+        
         order_id = query.data.split("_")[-1]
         order = Order.objects.get(id=order_id)
 
-        order_status_buttons = [[InlineKeyboardButton("Говорить", callback_data=f"st_chat_{order_id}"), InlineKeyboardButton("Переговоры", callback_data=f"st_rechat_{order_id}")],
-                                [InlineKeyboardButton("Завершить успешно", callback_data=f"st_success_{order_id}"), InlineKeyboardButton("Отменено", callback_data=f"st_cancel_{order_id}")],
-                                [InlineKeyboardButton("🔙 Назад", callback_data=f"region_{order.region}_{order.status}")]]
+        order_status_buttons = [
+            [
+                InlineKeyboardButton("Говорить", callback_data=f"st_chat_{order_id}"),
+                InlineKeyboardButton("Переговоры", callback_data=f"st_rechat_{order_id}")
+            ],
+            [
+                InlineKeyboardButton("Завершить успешно", callback_data=f"st_success_{order_id}"),
+                InlineKeyboardButton("Отменено", callback_data=f"st_cancel_{order_id}")
+            ],
+            [
+                InlineKeyboardButton("🔙 Назад", callback_data=f"region_{order.region}_{order.status}")
+            ]
+        ]
 
-        if order.product.photo:
-            return context.bot.send_photo(
+        products = order.product.all()
+        media_group = []
+        product_names = [p.name for p in products]
+        product_list_text = "\n".join(f"• {name}" for name in product_names)
+        
+        for i, product in enumerate(products):
+            if product.photo:
+                if i == 0:
+                    caption = (
+                        f"Заказы:\n{product_list_text}\n\n"
+                        f"Клиент: {order.client_name}\n"
+                        f"Телефон: {order.phone_number}\n"
+                        f"Статус заказа: {order.get_status_display()}\n"
+                        f"Регион: {order.get_region_display()}\n"
+                        f"Создано: {order.created_at.strftime('%d-%m-%Y %H:%M')}\n"
+                        f"Обновлено: {order.updated_at.strftime('%d-%m-%Y %H:%M')}"
+                    )
+                    media_group.append(InputMediaPhoto(media=product.photo.file, caption=caption))
+                else:
+                    media_group.append(InputMediaPhoto(media=product.photo.file))
+
+        sent_message_ids = []
+
+        if media_group:
+            media_messages = context.bot.send_media_group(
                 chat_id=query.message.chat_id,
-                photo=order.product.photo.file,
-                caption=f"Заказ: {order.product.name}\n"
+                media=media_group
+            )
+            sent_message_ids.extend([msg.message_id for msg in media_messages])
+        else:
+            message_text = (
+                f"Заказы:\n{product_list_text}\n\n"
                 f"Клиент: {order.client_name}\n"
                 f"Телефон: {order.phone_number}\n"
                 f"Статус заказа: {order.get_status_display()}\n"
                 f"Регион: {order.get_region_display()}\n"
                 f"Создано: {order.created_at.strftime('%d-%m-%Y %H:%M')}\n"
-                f"Обновлено: {order.updated_at.strftime('%d-%m-%Y %H:%M')}",
-                reply_markup=InlineKeyboardMarkup(order_status_buttons)
+                f"Обновлено: {order.updated_at.strftime('%d-%m-%Y %H:%M')}"
             )
+            msg = context.bot.send_message(
+                chat_id=query.message.chat_id,
+                text=message_text
+            )
+            sent_message_ids.append(msg.message_id)
+        
+        status_msg = context.bot.send_message(
+            chat_id=query.message.chat_id,
+            text="Выберите действие:",
+            reply_markup=InlineKeyboardMarkup(order_status_buttons)
+        )
+        sent_message_ids.append(status_msg.message_id)
+
+        context.chat_data["order_message_ids"] = sent_message_ids
+
 
 def order_statused(update: Update, context: CallbackContext):
     query = update.callback_query
     query.answer()
+
+    if "order_message_ids" in context.chat_data:
+        for msg_id in context.chat_data["order_message_ids"]:
+            try:
+                context.bot.delete_message(chat_id=query.message.chat_id, message_id=msg_id)
+            except Exception as e:
+                pass
+        context.chat_data.clear()
 
     if query.data.startswith("st_chat_"):
         order_id = query.data.split("_")[2]
         order = Order.objects.get(pk=order_id)
         order.status = "cn"
         order.save()
+        
         query.message.delete()
+
         query.message.reply_text("Идёт общение с клиентом!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Назад", callback_data=f"back_to_start")]]))
 
     elif query.data.startswith("st_rechat_"):
@@ -190,7 +264,9 @@ def order_statused(update: Update, context: CallbackContext):
         order = Order.objects.get(pk=order_id)
         order.status = "rc"
         order.save()
+
         query.message.delete()
+
         query.message.reply_text("Оставлено для повторного общения с клиентом!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Назад", callback_data=f"back_to_start")]]))
 
     elif query.data.startswith("st_success_"):
@@ -198,7 +274,9 @@ def order_statused(update: Update, context: CallbackContext):
         order = Order.objects.get(pk=order_id)
         order.status = "cd"
         order.save()
+
         query.message.delete()
+
         query.message.reply_text("Заказ успешно завершён!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Назад", callback_data=f"back_to_start")]]))
 
     elif query.data.startswith("st_cancel_"):
@@ -206,14 +284,26 @@ def order_statused(update: Update, context: CallbackContext):
         order = Order.objects.get(pk=order_id)
         order.status = "cnd"
         order.save()
+
         query.message.delete()
         query.message.reply_text("Заказ отменён!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Назад", callback_data=f"back_to_start")]]))
 
 def back_to_start(update: Update, context: CallbackContext):
     query = update.callback_query
     query.answer()
+    try:
+        context.bot.delete_message(chat_id=query.message.chat_id, message_id=query.message.message_id - 1)
+        context.bot.delete_message(chat_id=query.message.chat_id, message_id=query.message.message_id - 1)
+        context.bot.delete_message(chat_id=query.message.chat_id, message_id=query.message.message_id - 1)
+        context.bot.delete_message(chat_id=query.message.chat_id, message_id=query.message.message_id - 1)
+    except:
+        pass
+    
+    try:
+        query.message.delete()
+    except:
+        pass
 
-    query.message.delete()
     query.message.reply_text(
         'Добро пожаловать в бота для заказов и уведомлений!',
         reply_markup=ReplyKeyboardMarkup(
