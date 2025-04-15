@@ -11,12 +11,12 @@ bot = updater.bot
 
 logger = logging.getLogger(__name__)
 
-@receiver(m2m_changed, sender=Order.products.through)
+@receiver(post_save, sender=Order)
 def order_product_changed(sender, instance, action, **kwargs):
 
     if action == "post_add":
         bot_admins = BotAdmin.objects.filter(is_active=True)
-        # product_names = ", ".join([p.name for p in instance.product.all()])
+        product_names = ", ".join([p.name for p in instance.product.all()])
         order_id = instance.pk
         region = instance.get_region_display()
         keyboard = [[
