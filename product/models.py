@@ -17,19 +17,33 @@ class Menu(models.Model):
 
     objects = MenuManager()
 
+    def __str__(self):
+        return self.label
+
 
 class SubMenu(models.Model):
     label = models.CharField(max_length=255, null=False)
     parent = models.ForeignKey(Menu, on_delete=models.CASCADE, related_name='submenus')
     key = models.CharField(max_length=255, null=False)
     objects = MenuManager()
+
+    def __str__(self):
+        return self.label
     
+def get_submenu_choices():
+    # Har doim SubMenu table dan barcha obyektlarni olib, (value, display) juftligini qaytaradi
+    return [(submenu.key, submenu.label) for submenu in SubMenu.objects.all()]
 
 class Blog(models.Model):
     title = models.CharField(max_length=255, null=False)
-    blog_type = models.CharField(max_length=255, null=False)
+    blog_type = models.CharField(
+        max_length=255,
+        null=False,
+        choices=get_submenu_choices()  # callable: har doim yangilab beradi
+    )
     description = RichTextField(blank="")
     photo = models.ImageField(upload_to='blog/', null=True)
+
 
 class Product(models.Model):
     name = models.CharField(max_length=255, null=False)
@@ -44,6 +58,9 @@ class Contact(models.Model):
     name = models.CharField(max_length=255, null=False)
     phone = models.CharField(max_length=255, null=False, validators=[validate_phone])
     message = models.TextField(blank='')
+
+    def __str__(self):
+        return self.name
 
 class Order(models.Model):
     
@@ -79,6 +96,9 @@ class Order(models.Model):
     region = models.CharField(max_length=255, null=False, choices=UZB_REGIONS)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Order #{self.id} by {self.client_name} - {self.status}"
 
 
 
