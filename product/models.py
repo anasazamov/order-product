@@ -3,6 +3,7 @@ import re
 from django.core.exceptions import ValidationError
 from uuid import uuid4
 from product.manager.manager import MenuManager
+from ckeditor.fields import RichTextField
 
 def validate_phone(value):
     if not re.match(r'^\+?1?\d{9,15}$', value):
@@ -27,7 +28,7 @@ class SubMenu(models.Model):
 class Blog(models.Model):
     title = models.CharField(max_length=255, null=False)
     blog_type = models.CharField(max_length=255, null=False)
-    description = models.TextField(blank='')
+    description = RichTextField(blank="")
     photo = models.ImageField(upload_to='blog/', null=True)
 
 class Product(models.Model):

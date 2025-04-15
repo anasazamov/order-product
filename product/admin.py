@@ -8,7 +8,7 @@ class MenuAdmin(admin.ModelAdmin):
     search_fields = ['name']
     list_filter = ['name']
     ordering = ['name']
-    list_editable = ['key']
+    # list_editable = ['key']
 
 @admin.register(SubMenu)
 class SubMenuAdmin(admin.ModelAdmin):
@@ -16,19 +16,19 @@ class SubMenuAdmin(admin.ModelAdmin):
     search_fields = ['name']
     list_filter = ['parent']
     ordering = ['name']
-    list_editable = ['key']
-    list_select_related = ['parent']
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.select_related('parent')
-    def parent(self, obj):
-        return obj.parent.name
-    parent.short_description = 'Menu'
-    parent.admin_order_field = 'parent__name'
-    parent.boolean = False
-    parent.allow_tags = True
-    parent.empty_value_display = '-empty-'
-    parent.admin_order_field = 'parent__name'
+    # list_editable = ['key']
+    # list_select_related = ['parent']
+    # def get_queryset(self, request):
+    #     qs = super().get_queryset(request)
+    #     return qs.select_related('parent')
+    # def parent(self, obj):
+    #     return obj.parent.name
+    # parent.short_description = 'Menu'
+    # parent.admin_order_field = 'parent__name'
+    # parent.boolean = False
+    # parent.allow_tags = True
+    # parent.empty_value_display = '-empty-'
+    # parent.admin_order_field = 'parent__name'
 
 @admin.register(Blog)
 class BlogAdmin(admin.ModelAdmin):
@@ -36,18 +36,18 @@ class BlogAdmin(admin.ModelAdmin):
     search_fields = ['title']
     list_filter = ['blog_type']
     ordering = ['title']
-    list_editable = ['blog_type']
-    list_select_related = ['blog_type']
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.select_related('blog_type')
-    def blog_type(self, obj):
-        return obj.blog_type.name
-    blog_type.short_description = 'Blog Type'
-    blog_type.admin_order_field = 'blog_type__name'
-    blog_type.boolean = False
-    blog_type.allow_tags = True
-    blog_type.empty_value_display = '-empty-'
+    # list_editable = ['blog_type']
+    # list_select_related = ['blog_type']
+    # def get_queryset(self, request):
+    #     qs = super().get_queryset(request)
+    #     return qs.select_related('blog_type')
+    # def blog_type(self, obj):
+    #     return obj.blog_type.name
+    # blog_type.short_description = 'Blog Type'
+    # blog_type.admin_order_field = 'blog_type__name'
+    # blog_type.boolean = False
+    # blog_type.allow_tags = True
+    # blog_type.empty_value_display = '-empty-'
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
@@ -67,18 +67,18 @@ class ContactAdmin(admin.ModelAdmin):
     list_display = ['name', 'phone']
     search_fields = ['name', 'phone']
     ordering = ['name']
-    list_editable = ['phone']
-    list_select_related = ['name', 'phone']
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.select_related('name', 'phone')
-    def name(self, obj):
-        return obj.name
-    name.short_description = 'Contact Name'
-    name.admin_order_field = 'name'
-    name.boolean = False
-    name.allow_tags = True
-    name.empty_value_display = '-empty-'
+    # list_editable = ['phone']
+    # list_select_related = ['name', 'phone']
+    # def get_queryset(self, request):
+    #     qs = super().get_queryset(request)
+    #     return qs.select_related('name', 'phone')
+    # def name(self, obj):
+    #     return obj.name
+    # name.short_description = 'Contact Name'
+    # name.admin_order_field = 'name'
+    # name.boolean = False
+    # name.allow_tags = True
+    # name.empty_value_display = '-empty-'
     list_per_page = 10
     list_max_show_all = 100
 

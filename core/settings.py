@@ -48,6 +48,7 @@ LOCALS_APP = [
     'drf_spectacular',
     'corsheaders',
     'bot',
+    'ckeditor'
     
     # 'drf_spectacular_sidecar'
     ]
