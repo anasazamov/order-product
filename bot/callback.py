@@ -289,8 +289,10 @@ def order_statused(update: Update, context: CallbackContext):
         order = Order.objects.get(pk=order_id)
         order.status = "cnd"
         order.save()
-
-        query.message.delete()
+        try:
+            query.message.delete()
+        except:
+            pass
         query.message.reply_text("Заказ отменён!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Назад", callback_data=f"back_to_start")]]))
 
 def back_to_start(update: Update, context: CallbackContext):

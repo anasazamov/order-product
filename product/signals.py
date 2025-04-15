@@ -13,10 +13,12 @@ logger = logging.getLogger(__name__)
 
 @receiver(m2m_changed, sender=Order.products.through)
 def order_product_changed(sender, instance, action, **kwargs):
-
     if action == "post_add":
         bot_admins = BotAdmin.objects.filter(is_active=True)
-        product_names = ", ".join([p.name for p in instance.product.all()])
+
+        product_names = ", ".join(
+            [f"{item.product.name} x {item.quantity}" for item in instance.order_items.all()]
+        )
         order_id = instance.pk
         region = instance.get_region_display()
         keyboard = [[
@@ -35,6 +37,7 @@ def order_product_changed(sender, instance, action, **kwargs):
                 reply_markup=InlineKeyboardMarkup(keyboard),
                 parse_mode="HTML"
             )
+
 
 @receiver(post_save, sender=Contact)
 def contact_created_signal(sender, instance, created, **kwargs):
