@@ -12,14 +12,14 @@ def validate_phone(value):
 # Create your models here.
 
 class Menu(models.Model):
-    name = models.CharField(max_length=255, null=False, unique=True)
+    label = models.CharField(max_length=255, null=False, unique=True)
     key = models.CharField(max_length=255, null=False)
 
     objects = MenuManager()
 
 
 class SubMenu(models.Model):
-    name = models.CharField(max_length=255, null=False)
+    label = models.CharField(max_length=255, null=False)
     parent = models.ForeignKey(Menu, on_delete=models.CASCADE, related_name='submenus')
     key = models.CharField(max_length=255, null=False)
     objects = MenuManager()

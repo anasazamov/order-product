@@ -4,18 +4,18 @@ from product.models import Menu, SubMenu, Blog, Product, Contact, Order
 
 @admin.register(Menu)
 class MenuAdmin(admin.ModelAdmin):
-    list_display = ['name', 'key']
-    search_fields = ['name']
-    list_filter = ['name']
-    ordering = ['name']
+    list_display = ['label', 'key']
+    search_fields = ['label']
+    list_filter = ['label']
+    ordering = ['label']
     # list_editable = ['key']
 
 @admin.register(SubMenu)
 class SubMenuAdmin(admin.ModelAdmin):
-    list_display = ['name', 'parent', 'key']
-    search_fields = ['name']
+    list_display = ['label', 'parent', 'key']
+    search_fields = ['label']
     list_filter = ['parent']
-    ordering = ['name']
+    ordering = ['label']
     # list_editable = ['key']
     # list_select_related = ['parent']
     # def get_queryset(self, request):

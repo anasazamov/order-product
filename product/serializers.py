@@ -38,20 +38,20 @@ class OrderSerializer(serializers.ModelSerializer):
 class CreateMenuSerializer(serializers.ModelSerializer):
     class Meta:
         model = Menu
-        fields = ['id', 'name']
+        fields = ['id', 'label']
 
 class MenuSerializer(serializers.ModelSerializer):
 
     children = serializers.SerializerMethodField(method_name='get_submenus')
     key = serializers.SerializerMethodField(method_name='get_key')
-    name = serializers.CharField(required=True)
+    label = serializers.CharField(required=True)
     class Meta:
         model = Menu
-        fields = ['id', 'name', 'key', 'children']
+        fields = ['id', 'label', 'key', 'children']
     
     def get_submenus(self, obj):
         submenus = SubMenu.objects.filter(parent=obj)
-        return SubMenuSerializer(submenus, many=True).data
+        return SubMenuDetailSerializer(submenus, many=True).data
     
     def get_key(self, obj):
         return obj.key
@@ -61,11 +61,11 @@ class MenuSerializer(serializers.ModelSerializer):
 class SubMenuSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubMenu
-        fields = ['name', 'parent']
+        fields = ['label', 'parent']
 
 class SubMenuDetailSerializer(SubMenuSerializer):
     parent = CreateMenuSerializer()
 
     class Meta:
         model = SubMenu
-        fields = ['id', 'name', 'parent', 'key']
+        fields = ['id', 'label', 'parent', 'key']
