@@ -1,6 +1,8 @@
 from django.db import models
 import re
 from django.core.exceptions import ValidationError
+from uuid import uuid4
+from product.manager.manager import MenuManager
 
 def validate_phone(value):
     if not re.match(r'^\+?1?\d{9,15}$', value):
@@ -8,8 +10,19 @@ def validate_phone(value):
 
 # Create your models here.
 
-# class BlogType(models.Model):
-#     name = models.CharField(max_length=255, null=False)
+class Menu(models.Model):
+    name = models.CharField(max_length=255, null=False, unique=True)
+    key = models.CharField(max_length=255, null=False)
+
+    objects = MenuManager()
+
+
+class SubMenu(models.Model):
+    name = models.CharField(max_length=255, null=False)
+    parent = models.ForeignKey(Menu, on_delete=models.CASCADE, related_name='submenus')
+    key = models.CharField(max_length=255, null=False)
+    objects = MenuManager()
+    
 
 class Blog(models.Model):
     title = models.CharField(max_length=255, null=False)
@@ -54,7 +67,7 @@ class Order(models.Model):
         ('rc', 'Повторное обсуждение'),
     ]
     
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    product = models.ManyToManyField(Product)
     client_name = models.CharField(max_length=255, null=False)
     phone_number = models.CharField(max_length=255, null=False, validators=[validate_phone])
     status = models.CharField(max_length=255, null=False, default='Pending', choices=STATUS_TYPES)

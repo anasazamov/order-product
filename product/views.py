@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from .models import Product, Blog, Contact, Order
-from .serializers import ProductSerializer, BlogSerializer, ContactSerializer, OrderSerializer
+from .models import Product, Blog, Contact, Order, Menu, SubMenu
+from .serializers import ProductSerializer, BlogSerializer, ContactSerializer, OrderSerializer, MenuSerializer, SubMenuSerializer, CreateMenuSerializer, SubMenuDetailSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -76,6 +76,36 @@ class OrderViewSet(viewsets.ModelViewSet):
         if self.action in ['create', 'update']:
             return [AllowAny()]
         return [IsAuthenticated()]
+
+class MenuViewSet(viewsets.ModelViewSet):
+    queryset = Menu.objects.all()
+    serializer_class = MenuSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+    
+    def get_serializer(self, *args, **kwargs):
+        if self.action in ['create', 'update']:
+            return CreateMenuSerializer(*args, **kwargs)
+        return MenuSerializer(*args, **kwargs)
+    
+class SubMenuViewSet(viewsets.ModelViewSet):
+    queryset = SubMenu.objects.all()
+    serializer_class = SubMenuSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+    
+    def get_serializer(self, *args, **kwargs):
+        if self.action in ['create', 'update', 'partial_update']:
+            return SubMenuSerializer(*args, **kwargs)
+        return SubMenuDetailSerializer(*args, **kwargs)
 
 class RegionAPIView(APIView):
     def get(self, request):
