@@ -16,7 +16,7 @@ def order_product_changed(sender, instance, created, **kwargs):
 
     if created:
         bot_admins = BotAdmin.objects.filter(is_active=True)
-        product_names = ", ".join([p.name for p in instance.product.all()])
+        # product_names = ", ".join([p.name for p in instance.product.all()])
         order_id = instance.pk
         region = instance.get_region_display()
         keyboard = [[
