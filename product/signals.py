@@ -11,7 +11,7 @@ bot = updater.bot
 
 logger = logging.getLogger(__name__)
 
-@receiver(m2m_changed, sender=Order.product.through)
+@receiver(m2m_changed, sender=Order.products.through)
 def order_product_changed(sender, instance, action, **kwargs):
 
     if action == "post_add":

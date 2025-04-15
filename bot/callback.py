@@ -164,7 +164,7 @@ def view_order(update: Update, context: CallbackContext):
 
     if query.data.startswith("order_"):
         query.message.delete()
-        
+
         order_id = query.data.split("_")[-1]
         order = Order.objects.get(id=order_id)
 
@@ -182,27 +182,40 @@ def view_order(update: Update, context: CallbackContext):
             ]
         ]
 
-        products = order.product.all()
-        media_group = []
-        product_names = [p.name for p in products]
-        product_list_text = "\n".join(f"• {name}" for name in product_names)
+        # Order itemlarini olish
+        order_items = order.order_items.all()
+        # Har bir order item uchun mahsulot nomi va miqdorini ko'rsatish
+        product_list_text = "\n".join(
+            f"• {item.product.name} x {item.quantity} ({item.product.price * item.quantity})"
+            for item in order_items
+        )
         
-        for i, product in enumerate(products):
+        # Umumiy summani hisoblash
+        total_price = sum(item.product.price * item.quantity for item in order_items)
+
+        # Buyurtma ma'lumotlarini matn ko'rinishida shakllantiramiz
+        caption_text = (
+            f"Заказы:\n{product_list_text}\n\n"
+            f"Общая сумма: {total_price}\n\n"
+            f"Клиент: {order.client_name}\n"
+            f"Телефон: {order.phone_number}\n"
+            f"Статус заказа: {order.get_status_display()}\n"
+            f"Регион: {order.get_region_display()}\n"
+            f"Создано: {order.created_at.strftime('%d-%m-%Y %H:%M')}\n"
+            f"Обновлено: {order.updated_at.strftime('%d-%m-%Y %H:%M')}"
+        )
+
+        media_group = []
+
+        # Har bir order item bo'yicha rasm (agar mavjud bo'lsa) qo'shamiz
+        for i, item in enumerate(order_items):
+            product = item.product
             if product.photo:
                 if i == 0:
-                    caption = (
-                        f"Заказы:\n{product_list_text}\n\n"
-                        f"Клиент: {order.client_name}\n"
-                        f"Телефон: {order.phone_number}\n"
-                        f"Статус заказа: {order.get_status_display()}\n"
-                        f"Регион: {order.get_region_display()}\n"
-                        f"Создано: {order.created_at.strftime('%d-%m-%Y %H:%M')}\n"
-                        f"Обновлено: {order.updated_at.strftime('%d-%m-%Y %H:%M')}"
-                    )
-                    media_group.append(InputMediaPhoto(media=product.photo.file, caption=caption))
+                    media_group.append(InputMediaPhoto(media=product.photo.file, caption=caption_text))
                 else:
                     media_group.append(InputMediaPhoto(media=product.photo.file))
-
+        
         sent_message_ids = []
 
         if media_group:
@@ -212,21 +225,12 @@ def view_order(update: Update, context: CallbackContext):
             )
             sent_message_ids.extend([msg.message_id for msg in media_messages])
         else:
-            message_text = (
-                f"Заказы:\n{product_list_text}\n\n"
-                f"Клиент: {order.client_name}\n"
-                f"Телефон: {order.phone_number}\n"
-                f"Статус заказа: {order.get_status_display()}\n"
-                f"Регион: {order.get_region_display()}\n"
-                f"Создано: {order.created_at.strftime('%d-%m-%Y %H:%M')}\n"
-                f"Обновлено: {order.updated_at.strftime('%d-%m-%Y %H:%M')}"
-            )
             msg = context.bot.send_message(
                 chat_id=query.message.chat_id,
-                text=message_text
+                text=caption_text
             )
             sent_message_ids.append(msg.message_id)
-        
+
         status_msg = context.bot.send_message(
             chat_id=query.message.chat_id,
             text="Выберите действие:",
@@ -235,6 +239,7 @@ def view_order(update: Update, context: CallbackContext):
         sent_message_ids.append(status_msg.message_id)
 
         context.chat_data["order_message_ids"] = sent_message_ids
+
 
 
 def order_statused(update: Update, context: CallbackContext):

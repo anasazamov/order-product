@@ -81,6 +81,7 @@ class MenuViewSet(viewsets.ModelViewSet):
     queryset = Menu.objects.all()
     serializer_class = MenuSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
@@ -96,6 +97,7 @@ class SubMenuViewSet(viewsets.ModelViewSet):
     queryset = SubMenu.objects.all()
     serializer_class = SubMenuSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:

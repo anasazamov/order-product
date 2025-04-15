@@ -72,7 +72,7 @@ class Order(models.Model):
         ('rc', 'Повторное обсуждение'),
     ]
     
-    product = models.ManyToManyField(Product)
+    products = models.ManyToManyField(Product, through='OrderItem', related_name='orders')
     client_name = models.CharField(max_length=255, null=False)
     phone_number = models.CharField(max_length=255, null=False, validators=[validate_phone])
     status = models.CharField(max_length=255, null=False, default='Pending', choices=STATUS_TYPES)
@@ -82,3 +82,10 @@ class Order(models.Model):
 
 
 
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='order_items')
+    quantity = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return f"{self.product.name} x {self.quantity} for Order #{self.order.id}"
