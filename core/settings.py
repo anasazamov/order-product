@@ -57,6 +57,7 @@ INSTALLED_APPS += LOCALS_APP
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -198,4 +199,5 @@ CORS_ALLOW_CREDENTIALS = True
 # CORS_REPLACE_HTTPS_REFERER = True
 
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 

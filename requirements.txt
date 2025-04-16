@@ -31,3 +31,5 @@ tzdata==2025.1
 tzlocal==5.3
 uritemplate==4.1.1
 urllib3==2.4.0
+
+whitenoise==6.9.0
