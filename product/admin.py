@@ -2,6 +2,23 @@ from django.contrib import admin
 from product.models import Menu, SubMenu, Blog, Product, Contact, Order
 # Register your models here.
 
+from django import forms
+from product.models import Blog, SubMenu
+
+class BlogForm(forms.ModelForm):
+    blog_type = forms.ChoiceField()  
+
+    class Meta:
+        model = Blog
+        fields = '__all__' 
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['blog_type'].choices = [
+            (submenu.key, submenu.label) for submenu in SubMenu.objects.all()
+        ]
+
+
 @admin.register(Menu)
 class MenuAdmin(admin.ModelAdmin):
     list_display = ['label', 'key']
@@ -36,6 +53,7 @@ class BlogAdmin(admin.ModelAdmin):
     search_fields = ['title']
     list_filter = ['blog_type']
     ordering = ['title']
+    form = BlogForm
     # list_editable = ['blog_type']
     # list_select_related = ['blog_type']
     # def get_queryset(self, request):

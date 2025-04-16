@@ -13,25 +13,34 @@ def validate_phone(value):
 
 class Menu(models.Model):
     label = models.CharField(max_length=255, null=False, unique=True)
-    key = models.CharField(max_length=255, null=False)
+    key = models.CharField(max_length=255, null=False, editable=False)
 
-    objects = MenuManager()
-
-    def __str__(self):
-        return self.label
-
-
-class SubMenu(models.Model):
-    label = models.CharField(max_length=255, null=False)
-    parent = models.ForeignKey(Menu, on_delete=models.CASCADE, related_name='submenus')
-    key = models.CharField(max_length=255, null=False)
     objects = MenuManager()
 
     def __str__(self):
         return self.label
     
+    def save(self, *args, **kwargs):
+        self.key = self.label.lower().replace(' ', '_') + str(uuid4())[:2]
+        super().save(*args, **kwargs)
+
+
+class SubMenu(models.Model):
+    label = models.CharField(max_length=255, null=False)
+    parent = models.ForeignKey(Menu, on_delete=models.CASCADE, related_name='submenus')
+    key = models.CharField(max_length=255, null=False, editable=False)
+    objects = MenuManager()
+
+    def __str__(self):
+        return self.label
+    
+    def save(self, *args, **kwargs):
+        
+        self.key = self.label.lower().replace(' ', '_') + str(uuid4())[:2]
+        super().save(*args, **kwargs)
+    
 def get_submenu_choices():
-    # Har doim SubMenu table dan barcha obyektlarni olib, (value, display) juftligini qaytaradi
+
     return [(submenu.key, submenu.label) for submenu in SubMenu.objects.all()]
 
 class Blog(models.Model):
@@ -39,7 +48,7 @@ class Blog(models.Model):
     blog_type = models.CharField(
         max_length=255,
         null=False,
-        choices=get_submenu_choices()  # callable: har doim yangilab beradi
+        choices=get_submenu_choices()
     )
     description = RichTextField(blank="")
     photo = models.ImageField(upload_to='blog/', null=True)
