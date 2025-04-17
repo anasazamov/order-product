@@ -21,7 +21,8 @@ class Menu(models.Model):
         return self.label
     
     def save(self, *args, **kwargs):
-        self.key = self.label.lower().replace(' ', '_') + str(uuid4())[:2]
+        if not self.key:
+            self.key = self.label.lower().replace(' ', '_') + str(uuid4())[:2]
         super().save(*args, **kwargs)
 
 
@@ -35,8 +36,8 @@ class SubMenu(models.Model):
         return self.label
     
     def save(self, *args, **kwargs):
-        
-        self.key = self.label.lower().replace(' ', '_') + str(uuid4())[:2]
+        if not self.key:
+            self.key = self.label.lower().replace(' ', '_') + str(uuid4())[:2]
         super().save(*args, **kwargs)
     
 def get_submenu_choices():
