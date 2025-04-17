@@ -198,6 +198,13 @@ CORS_ALLOW_HEADERS = [
 CORS_ALLOW_CREDENTIALS = True
 # CORS_REPLACE_HTTPS_REFERER = True
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://api.xirurgiya-pro.uz",
+    "https://xirurgiya-pro.uz",
+    "https://www.xirurgiya-pro.uz",
+]
+
+
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
